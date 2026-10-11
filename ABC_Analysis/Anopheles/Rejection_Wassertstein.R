@@ -102,7 +102,7 @@ for (d in datasets) {
       target = 0, 
       param = parameters[-p, ], 
       sumstat = dist[-p], 
-      tol = 0.01,
+      tol = 0.005,
       transf=c("none","none","none","none","none"), 
       prior.range=rbind(c(10000000,5000000000),c(1e-2,1.0),c(5,1000.0),c(150,900)),
       method = "rejection"
