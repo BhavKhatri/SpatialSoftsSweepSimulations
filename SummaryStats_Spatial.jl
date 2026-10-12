@@ -18,8 +18,7 @@ import StatsBase: sample
 
 import Interpolations: Line
 
-include("NumberofOrigins_Spatial_ComplexHaplotypes_SqDemes_mnmigration.jl") #this includes functions to calculate x, y position from latitude
-include("GaussPoissonHybrid_mnrnd.jl")
+include("NumberofOrigins_Spatial_ComplexHaplotypes_SqDemes_mnmigration.jl") #this includes functions to calculate x, y position from latitude, and itself includes GaussPoissonHybrid_mnrnd.jl
 
 @doc """
 This runs the spatial soft sweep code outputting the final state in Xt, which is an array of an array where Xt[i] is a complex vector which lists all the haplotypes in the ith deme. 
@@ -240,7 +239,7 @@ function SummaryStats_Spatial(N::Real, Area::Real, theta::Real, s::Real, D::Real
         uniquesamplingtime = sort(unique(samplingtime))
         numbuniquetimepoints = length(uniquesamplingtime)
 
-        maxnumsamples=1
+        # maxnumsamples=1
 
         println("Number of randomly-placed spatial sample sites (no shape file) = ", nspatialsites)
 
@@ -299,10 +298,10 @@ function SummaryStats_Spatial(N::Real, Area::Real, theta::Real, s::Real, D::Real
             indNotNan  = findall(x->!isnan(x),Xt[i])
             
             if isempty(indNotNan)
-                println("indNotNan = ",indNotNaN)
+                println("indNotNan = ",indNotNan)
                 println("Xt[i] = ",Xt[i])
                 println("i = ",i)
-                prinln("ND = ",ND)
+                println("ND = ",ND)
                 println("NDeme = ",NDeme)
                 println("D = ",D)
                 println("N = ",N)
@@ -617,7 +616,7 @@ function PlotHaplotypes(xhap,xthr,xp,yp,wdeme,polygonAfrica,polygonGambiae,sampl
 
             ii=1
             for cl in Contour.levels(c)
-                lvl = Contour.level(cl)
+                # lvl = Contour.level(cl)
  
 
                 lw = LW[ii]

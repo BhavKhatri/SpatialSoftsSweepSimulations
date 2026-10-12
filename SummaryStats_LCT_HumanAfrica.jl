@@ -19,7 +19,7 @@ N= 2*5.8767e+05 #Number of chromosomes
 
 s=0.082794
 hdom = 1
-D=3820
+D=3820/2
 
 
 μ=6e-8  #1.2e-7  #human bp mutation rate is μ0=1.2e-8 so for 5 SNPs we have μ = 5μ0 = 6e-8

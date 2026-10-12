@@ -6,13 +6,28 @@ using MAT
 include("SampleSummaryStats_Parallel.jl")
 
 
-if isempty(ARGS)
-    ContinueSim = []
-else
-    ContinueSim = parse(Int128,ARGS[1])
+#returns args[i] if it was supplied and non-empty, otherwise [] (so each positional
+#arg can be left blank, e.g. julia script.jl "" "1.2e-7", to skip it while still
+#supplying a later one)
+function arg_or_empty(args,i)
+    return (length(args)>=i && !isempty(args[i])) ? args[i] : []
 end
 
+ContinueSim_arg = arg_or_empty(ARGS,1)
+ContinueSim = isempty(ContinueSim_arg) ? [] : parse(Int128,ContinueSim_arg)
+
+#optional 2nd arg: mutation rate override, passed in from the PBS submission script.
+#If not supplied (or empty), the default μ set below in the Species block is used.
+mu_arg = arg_or_empty(ARGS,2)
+
+#optional 3rd arg: number of replicates M, passed in from the PBS submission script.
+#If not supplied (or empty), the default M set below is used (handy for quick local
+#testing with a small M without that value reaching the cluster's submitted jobs).
+M_arg = arg_or_empty(ARGS,3)
+
 println("ContinueSim = ",ContinueSim)
+println("mu_arg = ",mu_arg)
+println("M_arg = ",M_arg)
 
 PPC=0 #set to 1 to do posterior predictive check (PPC), where posterior samples are read in from file 
 #and the maxmin values below ignored, otherwise set to 0 for normal behaviour to draw params between limits shown
@@ -20,12 +35,12 @@ PPC=0 #set to 1 to do posterior predictive check (PPC), where posterior samples 
 #the file specified when PPC=1 is read in which contains posterior samples from Manolo's NN-ABC analysis
 #a new directory is also created for storing the simulation results for each posteror sample set.
 PPC_path = "Manolo_Analysis/Human_LCT_FieldSampling/NNABC_Rerun"
-PPC_filename_path = "PosteriorSamples_mu=1.2e-7_NewPrior_h=1.mat" #ONly used if PPC=1
+PPC_filename = "PosteriorSamples_mu=1.2e-7_h=1.mat" #ONly used if PPC=1
 
 #Species switch: determines which priors/constants/data files are used below. 
 #Set to either "AGambiae" (Anopheles gambiae, Vgsc locus) or "Human" (lactase persistence, LCT locus).
-# Species = "Human"
-Species = "AGambiae"
+Species = "Human"
+# Species = "AGambiae"
 
 if Species=="AGambiae"
 
@@ -78,13 +93,19 @@ else
 
 end
 
+#override the default mutation rate above if one was passed in via ARGS[2]
+if !isempty(mu_arg)
+    μ = parse(Float64,mu_arg)
+end
+println("μ = ",μ)
+
 vars = matread(rangepath)
 lon_shape = vars["lon"];
 lat_shape = vars["lat"];
 
 R=6378.137#km radius at the equator
 
-
+randomspatialsampling=0
 
 #Note that none of the code this script calls needs to read these files again, since pltfigs=0 
 #in SampleSummaryStats_Parallel.jl, which calls SummaryStat_Spatial.jl with this value
@@ -114,7 +135,7 @@ else #draw random space time sites but all at the same time! And distribute nsam
         maxsamplingyear = 2010 
     end
 
-    randomspatialsampling=0
+    
     nspatialsites = 500
     nsample = 22180
 
@@ -210,10 +231,16 @@ xwt_target = []
 if Species=="AGambiae"
     prescript = string("AnophelesGambiaeRangeSubSaharanAfrica_h=",hdom)
 else #Species=="Human"
-    prescript = string("HumanLCT_AfricaRange_NewPriors_h=",hdom) # 0.8"
+    prescript = string("HumanLCT_AfricaRange_h=",hdom) # 0.8"
 end
 
-M=3#256 #ask for M+1 = 256 cores from HPC
+M=3#256
+
+#override the default M above if one was passed in via ARGS[3]
+if !isempty(M_arg)
+    M = parse(Int,M_arg)
+end
+println("M = ",M)
 
 
 if PPC ==0
@@ -278,6 +305,7 @@ N,s,D, yearorigin, A, θ, η, Rg, H, NeiD, xmut, ηmean, ηstd = SampleSummarySt
                                                                                         uniquespatialindx, lon_shape, lat_shape, ContinueSim, PPC, gamma, Species,PPC_filename)
 
 
+ 
 
 
 

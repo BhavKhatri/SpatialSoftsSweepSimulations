@@ -13,7 +13,7 @@ include("SummaryStats_Spatial.jl")
 
 
 function SampleSummaryStats_Parallel(Nminmax::Vector{Float64}, Aminmax::Vector{Float64}, θminmax::Vector{Float64}, sminmax::Vector{Float64}, Dminmax::Vector{Float64}, Tminmax::Vector{Float64}, hdom,
-                                                                                Ratio::Real, Gaussian::Real, Nsamp, Nsampt, M::Integer, latlon, latlontime, uniquespatialindx, lon_shape, lat_shape, ContinueSim, PPC, gamma, Species::String="AGambiae", PPC_filename)
+                                                                                Ratio::Real, Gaussian::Real, Nsamp, Nsampt, M::Integer, latlon, latlontime, uniquespatialindx, lon_shape, lat_shape, ContinueSim, PPC, gamma, Species::String, PPC_filename)
  
     #M is the number of replicates
     #Each replicate has parameters drawn from a log-uniform distribution
@@ -186,6 +186,21 @@ function SampleSummaryStats_Parallel(Nminmax::Vector{Float64}, Aminmax::Vector{F
         NDeme = var["NDeme"]
         μ = var["mu"]
 
+        #M (passed in as an argument) may not match the number of replicates the
+        #run being continued was originally set up with, since N/etc. above are read
+        #back from that original run's PriorParams.mat. Resize the per-replicate
+        #tracking arrays below to the original M so that indexing by sample number
+        #(e.g. exclude[mk] below) doesn't go out of bounds.
+        M = length(N)
+        exclude = [false for i=1:M]
+        η = zeros(M)
+        Rg = zeros(M)
+        H = zeros(M)
+        NeiD = zeros(M)
+        xmut = zeros(M)
+        ηmean = zeros(M)
+        ηstd = zeros(M)
+
         files = filter(x -> occursin("Sum", x), readdir()) #this should return all saved mat files, starting with "SummaryStat.." in array files
 
         # m = zeros(length(files))
@@ -224,7 +239,10 @@ function SampleSummaryStats_Parallel(Nminmax::Vector{Float64}, Aminmax::Vector{F
 
     initialtime = now()
 
-    
+    #serializes writes to the files shared across threads (PriorParams.mat/.csv below) so
+    #two threads can never have them open via HDF5 at the same time.
+    priorparams_lock = ReentrantLock()
+
     Threads.@threads for i=1:M
     # for i=1:M
 
@@ -313,19 +331,10 @@ function SampleSummaryStats_Parallel(Nminmax::Vector{Float64}, Aminmax::Vector{F
                         priorparams = Dict("N"=>N,"s"=>s, "D"=>D,"yearorigin"=>yearorigin,"theta"=>θ,"Ademe"=>Ademe,
                         "Area"=>A,"ND"=>ND,"NDeme"=>NDeme,"mu"=>μ)
         
-                        wait_until_file_closed("PriorParams.mat")
-                        # while isopen("PriorParams.mat")
-                        #     sleep(10)
-                        # end
-
-                        matwrite("PriorParams.mat",priorparams;compress=true)
-
-                        wait_until_file_closed("PriorParams.csv")
-                        # while isopen("PriorParams.csv")
-                        #     sleep(10)
-                        # end
-
-                        CSV.write("PriorParams.csv", DataFrame(priorparams))
+                        lock(priorparams_lock) do
+                            matwrite("PriorParams.mat",priorparams;compress=true)
+                            CSV.write("PriorParams.csv", DataFrame(priorparams))
+                        end
                     end
             
                 end

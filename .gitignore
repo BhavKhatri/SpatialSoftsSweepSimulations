@@ -39,3 +39,9 @@ octave-workspace
 *.bz2
 *.tar
 *.tar.bz2
+
+# PBS job stdout/stderr
+JOB_OUTPUTS/
+
+# Simulation Output directory
+SampleSummaryStats/
