@@ -71,11 +71,7 @@ for (d in datasets) {
     orig_param4 = NA_real_,
     median_param4 = NA_real_,
     ci_low_param4 = NA_real_,
-    ci_high_param4 = NA_real_,
-    orig_param5 = NA_real_,
-    median_param5 = NA_real_,
-    ci_low_param5 = NA_real_,
-    ci_high_param5 = NA_real_
+    ci_high_param4 = NA_real_
   )
 
   # Define a function to pad smaller matrices on the reight side, so that the Wasserstein distance can be computed.
@@ -106,9 +102,9 @@ for (d in datasets) {
       target = 0, 
       param = parameters[-p, ], 
       sumstat = dist[-p], 
-      tol = 0.01,
+      tol = 0.005,
       transf=c("none","none","none","none","none"), 
-      prior.range=rbind(c(10000000,5000000000),c(1e-2,1.0),c(5,1000.0),c(150,900),c(8,900)),
+      prior.range=rbind(c(10000000,5000000000),c(1e-2,1.0),c(5,1000.0),c(150,900)),
       method = "rejection"
     )
 
@@ -138,11 +134,6 @@ for (d in datasets) {
     results$median_param4[i] <- median(post.parest$unadj.values[,4])
     results$ci_low_param4[i] <- ci_vals[1, 4]
     results$ci_high_param4[i] <- ci_vals[2, 4]
-    
-    results$orig_param5[i] <- orig_vals[[5]]
-    results$median_param5[i] <- median(post.parest$unadj.values[,5])
-    results$ci_low_param5[i] <- ci_vals[1, 5]
-    results$ci_high_param5[i] <- ci_vals[2, 5]
     
     i <- i+1
     

@@ -39,7 +39,7 @@ for (d in datasets) {
   
 
   # Perform 100 iterations of cross-validation with different thresholds to select the value with the highest accuracy.
-  cv.parest <- cv4abc(parameters, sust, nval=100, tol =c(.05,.01,.005), transf=c("none","none","none","none","none"), prior.range=rbind(c(10000000,5000000000),c(1e-2,1.0),c(5,1000.0),c(150,900),c(8,900)), method = "rejection")
+  cv.parest <- cv4abc(parameters, sust, nval=100, tol =c(.05,.01,.005), transf=c("none","none","none","none"), prior.range=rbind(c(10000000,5000000000),c(1e-2,1.0),c(5,1000.0),c(150,900)), method = "rejection")
   print(names(datasets[counter]))
   print(summary(cv.parest))
   
@@ -62,11 +62,7 @@ for (d in datasets) {
     orig_param4 = NA_real_,
     median_param4 = NA_real_,
     ci_low_param4 = NA_real_,
-    ci_high_param4 = NA_real_,
-    orig_param5 = NA_real_,
-    median_param5 = NA_real_,
-    ci_low_param5 = NA_real_,
-    ci_high_param5 = NA_real_
+    ci_high_param4 = NA_real_
   )
   
   for (i in 1:nrow(sust)) {
@@ -77,7 +73,7 @@ for (d in datasets) {
       sumstat = sust[-i, ], 
       tol = 0.005,
       transf=c("none","none","none","none","none"), 
-      prior.range=rbind(c(10000000,5000000000),c(1e-2,1.0),c(5,1000.0),c(150,900),c(8,900)),
+      prior.range=rbind(c(10000000,5000000000),c(1e-2,1.0),c(5,1000.0),c(150,900)),
       method = "rejection"
     )
     
@@ -107,11 +103,6 @@ for (d in datasets) {
     results$median_param4[i] <- median(post.parest$unadj.values[,4])
     results$ci_low_param4[i] <- ci_vals[1, 4]
     results$ci_high_param4[i] <- ci_vals[2, 4]
-    
-    results$orig_param5[i] <- orig_vals[[5]]
-    results$median_param5[i] <- median(post.parest$unadj.values[,5])
-    results$ci_low_param5[i] <- ci_vals[1, 5]
-    results$ci_high_param5[i] <- ci_vals[2, 5]
     
   }
   # Save to output file.

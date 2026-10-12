@@ -18,7 +18,7 @@ parameters <- parameters[is.finite(rowSums(sust)),]
 sust <- sust[is.finite(rowSums(sust)),]
   
 # Vector of empirical summary statistics.
-emp<-c(10,259,0.295,0.9780,0.629)
+emp<-c(10,259,0.295,0.9780,0.692)
 
 
 # Run abc with a neural network approach.
@@ -27,8 +27,8 @@ post.parest <- abc(
       param = parameters[1:5000,], 
       sumstat = sust[1:5000,], 
       tol = .05,
-      transf=c("log","log","log","log","log"), 
-      prior.range = rbind(c(10000000,5000000000),c(1e-2,1.0),c(5,1000.0),c(150,900),c(8,900)), 
+      transf=c("log","log","log","log"), 
+      prior.range = rbind(c(10000000,5000000000),c(1e-2,1.0),c(5,1000.0),c(150,900)), 
       method = "neuralnet"
     )
 
